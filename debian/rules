@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	dh_auto_install
+
+	# Install the old 2.x pom in libplexus-classworlds2-java
+	mh_installpom -plibplexus-classworlds2-java -e2.x pom.xml
+	rm -Rf debian/libplexus-classworlds2-java/usr/share/maven-repo/org/codehaus/plexus/plexus-classworlds/debian

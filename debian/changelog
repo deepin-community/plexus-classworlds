@@ -1,0 +1,75 @@
+plexus-classworlds (2.6.0-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream release
+    - Refreshed the patch
+  * Standards-Version updated to 4.3.0
+  * Switch to debhelper level 11
+  * Use salsa.debian.org Vcs-* URLs
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Fri, 11 Jan 2019 13:53:01 +0100
+
+plexus-classworlds (2.5.2-2) unstable; urgency=medium
+
+  * Team upload.
+  * Renamed the package to plexus-classworlds
+    - Kept libplexus-classworlds2-java as a transitional package
+  * Build with maven-debian-helper instead of maven-ant-helper
+  * Enabled the unit tests
+  * Standards-Version updated to 4.1.0
+  * Switch to debhelper level 10
+  * Use secure Vcs-* URLs
+  * No longer use githubredir.debian.net in debian/watch
+  * Updated the Homepage field
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Thu, 21 Sep 2017 17:36:08 +0200
+
+plexus-classworlds2 (2.5.2-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream release
+  * Standards-Version updated to 3.9.6 (no changes)
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Thu, 02 Oct 2014 12:08:23 +0200
+
+plexus-classworlds2 (2.5.1-2) unstable; urgency=low
+
+  * Team upload.
+  * Updated the Maven rules to transform all plexus-classworlds
+    artifacts to 2.x (Closes: #727637)
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Sat, 26 Oct 2013 22:25:24 +0200
+
+plexus-classworlds2 (2.5.1-1) unstable; urgency=low
+
+  * Team upload.
+  * New upstream release
+  * debian/control:
+    - Use canonical URLs for the Vcs-* fields
+    - Updated Standards-Version to 3.9.4 (no changes)
+  * Build depend on debhelper >= 9
+  * debian/copyright: Updated to the Copyright Format 1.0
+  * debian/rules: Improved the clean target to allow rebuilds
+  * Removed the unused debian/orig-tar.sh script
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Wed, 23 Oct 2013 11:01:52 +0200
+
+plexus-classworlds2 (2.4-1) unstable; urgency=low
+
+  * Upstream release:
+    - d/{watch,orig-tar.sh}: Update for github.
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Sun, 18 Dec 2011 14:55:18 +0100
+
+plexus-classworlds2 (2.2.3-2) unstable; urgency=low
+
+  * d/copyright: Fix license of "The Werken Company" code
+    to Apache-1.1.
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Thu, 01 Dec 2011 20:21:35 +0100
+
+plexus-classworlds2 (2.2.3-1) unstable; urgency=low
+
+  * Initial release (Closes: #648773)
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Mon, 28 Nov 2011 22:51:50 +0100
