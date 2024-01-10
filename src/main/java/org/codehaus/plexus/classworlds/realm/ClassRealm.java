@@ -82,11 +82,11 @@ public class ClassRealm
 
         this.id = id;
 
-        foreignImports = new TreeSet<Entry>();
+        foreignImports = new TreeSet<>();
 
         strategy = StrategyFactory.getStrategy( this );
 
-        lockMap = isParallelCapable ? new ConcurrentHashMap<String, Object>() : null;
+        lockMap = isParallelCapable ? new ConcurrentHashMap<>() : null;
 
         if ( isParallelCapable ) {
         	// We must call super.getClassLoadingLock at least once
@@ -109,7 +109,7 @@ public class ClassRealm
     {
         if ( parentImports == null )
         {
-            parentImports = new TreeSet<Entry>();
+            parentImports = new TreeSet<>();
         }
 
         parentImports.add( new Entry( null, packageName ) );
@@ -159,7 +159,7 @@ public class ClassRealm
 
     public Collection<ClassRealm> getImportRealms()
     {
-        Collection<ClassRealm> importRealms = new HashSet<ClassRealm>();
+        Collection<ClassRealm> importRealms = new HashSet<>();
 
         for ( Entry entry : foreignImports )
         {
@@ -200,7 +200,7 @@ public class ClassRealm
     public ClassRealm createChildRealm( String id )
         throws DuplicateRealmException
     {
-        ClassRealm childRealm = getWorld().newRealm( id, null );
+        ClassRealm childRealm = getWorld().newRealm( id, (ClassLoader) null );
 
         childRealm.setParentRealm( this );
 
@@ -272,7 +272,8 @@ public class ClassRealm
         }
     }
 
-    // java11
+    // overwrites https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/ClassLoader.html#findClass(java.lang.String,java.lang.String) 
+    // introduced in Java9
     protected Class<?> findClass( String moduleName, String name )
     {
         if ( moduleName != null )
@@ -281,7 +282,7 @@ public class ClassRealm
         }
         try
         {
-            return super.findClass( name );
+            return findClassInternal( name );
         }
         catch ( ClassNotFoundException e )
         {
@@ -306,6 +307,12 @@ public class ClassRealm
         throw new ClassNotFoundException( name );
     }
 
+    protected Class<?> findClassInternal( String name )
+         throws ClassNotFoundException
+    {
+        return super.findClass( name );
+    }
+
     public URL getResource( String name )
     {
         URL resource = super.getResource( name );
@@ -320,7 +327,7 @@ public class ClassRealm
     public Enumeration<URL> getResources( String name )
         throws IOException
     {
-        Collection<URL> resources = new LinkedHashSet<URL>( Collections.list( super.getResources( name ) ) );
+        Collection<URL> resources = new LinkedHashSet<>( Collections.list( super.getResources( name ) ) );
         resources.addAll( Collections.list( strategy.getResources( name ) ) );
         return Collections.enumeration( resources );
     }
@@ -422,7 +429,7 @@ public class ClassRealm
 
                 if ( clazz == null )
                 {
-                    clazz = super.findClass( name );
+                    clazz = findClassInternal( name );
                 }
 
                 return clazz;
@@ -495,7 +502,7 @@ public class ClassRealm
 
     public URL loadResourceFromSelf( String name )
     {
-        return super.findResource( name );
+        return findResource( name );
     }
 
     public URL loadResourceFromParent( String name )
@@ -539,7 +546,7 @@ public class ClassRealm
     {
         try
         {
-            return super.findResources( name );
+            return findResources( name );
         }
         catch ( IOException e )
         {
