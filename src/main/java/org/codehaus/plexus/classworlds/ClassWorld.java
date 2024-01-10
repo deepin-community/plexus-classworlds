@@ -24,9 +24,11 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.classworlds.realm.DuplicateRealmException;
+import org.codehaus.plexus.classworlds.realm.FilteredClassRealm;
 import org.codehaus.plexus.classworlds.realm.NoSuchRealmException;
 
 /**
@@ -34,11 +36,11 @@ import org.codehaus.plexus.classworlds.realm.NoSuchRealmException;
  *
  * @author <a href="mailto:bob@eng.werken.com">bob mcwhirter</a>
  */
-public class ClassWorld
+public class ClassWorld implements Closeable
 {
     private Map<String, ClassRealm> realms;
 
-    private final List<ClassWorldListener> listeners = new ArrayList<ClassWorldListener>();
+    private final List<ClassWorldListener> listeners = new ArrayList<>();
 
     public ClassWorld( String realmId, ClassLoader classLoader )
     {
@@ -56,7 +58,7 @@ public class ClassWorld
 
     public ClassWorld()
     {
-        this.realms = new LinkedHashMap<String, ClassRealm>();
+        this.realms = new LinkedHashMap<>();
     }
 
     public ClassRealm newRealm( String id )
@@ -65,7 +67,25 @@ public class ClassWorld
         return newRealm( id, getClass().getClassLoader() );
     }
 
-    public synchronized ClassRealm newRealm( String id, ClassLoader classLoader )
+    public ClassRealm newRealm( String id, ClassLoader classLoader )
+        throws DuplicateRealmException
+    {
+        return newRealm( id, classLoader, null );
+    }
+
+    /**
+     * Adds a class realm with filtering.
+     * Only resources/classes whose name matches a given predicate are exposed.
+     * @param id The identifier for this realm, must not be <code>null</code>.
+     * @param classLoader The base class loader for this realm, may be <code>null</code> to use the bootstrap class
+     *            loader.
+     * @param filter a predicate to apply to each resource name to determine if it should be loaded through this class loader
+     * @return the created class realm
+     * @throws DuplicateRealmException in case a realm with the given id does already exist
+     * @since 2.7.0
+     * @see FilteredClassRealm
+     */
+    public synchronized ClassRealm newRealm( String id, ClassLoader classLoader, Predicate<String> filter )
         throws DuplicateRealmException
     {
         if ( realms.containsKey( id ) )
@@ -75,8 +95,14 @@ public class ClassWorld
 
         ClassRealm realm;
 
-        realm = new ClassRealm( this, id, classLoader );
-
+        if ( filter == null )
+        {
+            realm = new ClassRealm( this, id, classLoader );
+        }
+        else
+        {
+            realm = new FilteredClassRealm( filter, this, id, classLoader );
+        }
         realms.put( id, realm );
 
         for ( ClassWorldListener listener : listeners )
@@ -86,35 +112,46 @@ public class ClassWorld
 
         return realm;
     }
+    
+    /**
+     * Closes all contained class realms.
+     * @since 2.7.0
+     */
+    @Override
+    public synchronized void close()
+        throws IOException
+    {
+        realms.values().stream().forEach( this::disposeRealm );
+        realms.clear();
+    }
 
     public synchronized void disposeRealm( String id )
         throws NoSuchRealmException
     {
-        ClassRealm realm = (ClassRealm) realms.remove( id );
+        ClassRealm realm = realms.remove( id );
 
         if ( realm != null )
         {
-            closeIfJava7( realm );
-            for ( ClassWorldListener listener : listeners )
-            {
-                listener.realmDisposed( realm );
-            }
+            disposeRealm( realm );
+        }
+        else
+        {
+            throw new NoSuchRealmException( this, id );
         }
     }
 
-    private void closeIfJava7( ClassRealm realm )
+    private void disposeRealm( ClassRealm realm )
     {
         try
         {
-            //noinspection ConstantConditions
-            if ( realm instanceof Closeable )
-            {
-                //noinspection RedundantCast
-                ( (Closeable) realm ).close();
-            }
+            realm.close();
         }
         catch ( IOException ignore )
         {
+        }
+        for ( ClassWorldListener listener : listeners )
+        {
+            listener.realmDisposed( realm );
         }
     }
 
@@ -123,7 +160,7 @@ public class ClassWorld
     {
         if ( realms.containsKey( id ) )
         {
-            return (ClassRealm) realms.get( id );
+            return realms.get( id );
         }
 
         throw new NoSuchRealmException( this, id );
@@ -131,7 +168,7 @@ public class ClassWorld
 
     public synchronized Collection<ClassRealm> getRealms()
     {
-        return Collections.unmodifiableList( new ArrayList<ClassRealm>( realms.values() ) );
+        return Collections.unmodifiableList( new ArrayList<>( realms.values() ) );
     }
 
     // from exports branch

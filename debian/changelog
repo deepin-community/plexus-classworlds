@@ -1,3 +1,14 @@
+plexus-classworlds (2.7.0-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream release
+    - Refreshed the patch
+  * Removed the -java-doc package
+  * Standards-Version updated to 4.6.2
+  * Removed Damien Raude-Morvan from the uploaders (Closes: #889414)
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Mon, 19 Dec 2022 18:28:04 +0100
+
 plexus-classworlds (2.6.0-1) unstable; urgency=medium
 
   * Team upload.
